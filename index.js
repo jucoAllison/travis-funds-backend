@@ -16,6 +16,7 @@ app.get("/", (req, res) => {
 app.use("/user", require("./api/signInUp"));
 app.use("/modify", require("./api/settings"));
 app.use("/proxy", require("./api/proxy"));
+app.use("/user/accounts/funds", require("./api/fund"));
 
 mongoose
   .connect(

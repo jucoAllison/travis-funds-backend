@@ -32,6 +32,8 @@ const newUser = new mongoose.Schema({
   accountName: String,
   bankName: String,
   routingNumber: String,
+
+  investingAmount: Number,
 });
 
 module.exports = mongoose.model('User_Schema', newUser);

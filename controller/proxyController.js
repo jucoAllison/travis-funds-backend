@@ -14,7 +14,7 @@ exports.getGraph = async (req, res) => {
       .status(200)
       .json({msg: 'sucessfull', err: false, history: data.data.history});
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     res.status(500).json({msg: 'error', err: true, error});
   }
 };
@@ -34,7 +34,7 @@ exports.firstFetching = async (req, res) => {
       .status(200)
       .json({msg: 'sucessfull', err: false, data:  setting});
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     res.status(500).json({msg: 'error', err: true, error});
   }
 };
@@ -54,7 +54,7 @@ exports.secondFetching = async (req, res) => {
       .status(200)
       .json({msg: 'sucessfull', err: false, data: setting});
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     res.status(500).json({msg: 'error', err: true, error});
   }
 };
@@ -74,7 +74,7 @@ exports.thirdFetching = async (req, res) => {
       .status(200)
       .json({msg: 'sucessfull', err: false, data: setting});
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     res.status(500).json({msg: 'error', err: true, error});
   }
 };
