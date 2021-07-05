@@ -17,6 +17,7 @@ app.use("/user", require("./api/signInUp"));
 app.use("/modify", require("./api/settings"));
 app.use("/proxy", require("./api/proxy"));
 app.use("/user/accounts/funds", require("./api/fund"));
+app.use("/user/accounts/deposits", require("./api/deposit"));
 
 mongoose
   .connect(
