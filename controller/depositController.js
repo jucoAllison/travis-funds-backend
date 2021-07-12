@@ -3,7 +3,7 @@ const userSchema = require('../schema/userSchema');
 const jwt = require('jsonwebtoken');
 
 exports.postNewDepositForUser = async (req, res) => {
-  const getUser = userSchema.findOne({_id: req.verify_id});
+  const getUser = await userSchema.findOne({_id: req.verify._id});
   if (!getUser) {
     return res.status(404).json({
       err: true,
@@ -11,16 +11,18 @@ exports.postNewDepositForUser = async (req, res) => {
     });
   }
   try {
-    if (+getUser.accountBalance > +req.body.amount) {
+    if (getUser.accountBalance >= +req.body.amount) {
       const getDeposit = await new depositShema({
         amount: req.body.amount,
         owner: getUser._id,
         investedIn: req.body.investedIn,
+        currentPrice: req.body.currentPrice,
+        unit: req.body.unit
       });
       const savedDeposit = await getDeposit.save();
       // now subtracting amount from accountBalance of the user and also adding to user totalDeposited
-      const accountBalance = +getUser.accountBalance - +req.body.amount;
-      const totalDeposited = +getUser.totalDeposited + +req.body.amount;
+      const accountBalance = await +getUser.accountBalance - +req.body.amount;
+      const totalDeposited = await +getUser.totalDeposited + +req.body.amount;
 
       const updatingUser = await userSchema.findOneAndUpdate(
         {_id: getUser._id},
@@ -37,14 +39,13 @@ exports.postNewDepositForUser = async (req, res) => {
         {expiresIn: '15m'}
       );
 
-      res.status(200).json({
+      return res.status(200).json({
         err: false,
-        msg: 'successfully deposited to your account',
+        msg: 'Successfully deposited to your account',
         token,
       });
-    }
-    {
-      res.status(401).json({
+    } else {
+     return res.status(401).json({
         err: true,
         msg: 'Insufficient balance',
       });
@@ -57,3 +58,21 @@ exports.postNewDepositForUser = async (req, res) => {
     });
   }
 };
+
+
+exports.getAllInvestments = async (req, res) => {
+  try {
+    const allDeposits = await depositShema.find({owner: req.verify._id})
+    return res.status(200).json({
+      err: false,
+      msg: "All deposits",
+      data: allDeposits
+    })
+  } catch (error) {
+    console.log(error)
+    res.status(400).json({
+      err: true,
+      msg: 'Check your internet connection',
+    });
+  }
+}

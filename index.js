@@ -1,39 +1,39 @@
 // const { urlencoded } = require("express");
-const express = require("express");
-const mongoose = require("mongoose");
-const cors = require("cors");
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
 const app = express();
-require("dotenv").config();
+require('dotenv').config();
 
 app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({extended: false}));
 
-app.get("/", (req, res) => {
-  res.status(200).json({ msg: "hello world" });
+app.get('/', (req, res) => {
+  res.status(200).json({msg: 'hello world'});
 });
 
-app.use("/user", require("./api/signInUp"));
-app.use("/modify", require("./api/settings"));
-app.use("/proxy", require("./api/proxy"));
-app.use("/user/accounts/funds", require("./api/fund"));
-app.use("/user/accounts/deposits", require("./api/deposit"));
+app.use('/user', require('./api/signInUp'));
+app.use('/modify', require('./api/settings'));
+app.use('/proxy', require('./api/proxy'));
+app.use('/user/accounts/funds', require('./api/fund'));
+app.use('/user/activity/investment', require('./api/deposit'));
 
 mongoose
   .connect(
     // "mongodb+srv://new_user01:new_user01@cluster0.0lloz.mongodb.net/travisFunds?retryWrites=true&w=majority",
-    "mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass&ssl=false",
-    { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false }
+    'mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass&ssl=false',
+    {useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false}
   )
   .then(() => {
     let port = process.env.PORT;
-    app.listen(port, () => console.log("app started at port" + " " + port));
+    app.listen(port, () => console.log('app started at port' + ' ' + port));
   })
-  .catch((err) => console.log("start server"));
+  .catch((err) => console.log('start server'));
 
 // HANDLING any other errors like when the request hits an undefined route
 app.use((req, res, next) => {
-  const error = new Error("invalid request");
+  const error = new Error('invalid request');
   error.status = 404;
   next(error);
 });
