@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
 const helper = require('../helper');
 
-const CreatingDeposit = new mongoose.Schema({
-  requestWithdrawal: {type: Boolean, required: true, default: false},
+const CreatingWithdrawal = new mongoose.Schema({
+  requestWithdrawal: {type: Boolean, required: true, default: true},
   isWithdrawal: {type: Boolean, required: true, default: false},
   pending: {type: Boolean, required: true, default: true},
   withdrawalAmount: String,
@@ -27,4 +27,4 @@ const CreatingDeposit = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model('Deposits', CreatingDeposit);
+module.exports = mongoose.model('Deposits', CreatingWithdrawal);

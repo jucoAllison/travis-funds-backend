@@ -17,7 +17,8 @@ exports.postNewDepositForUser = async (req, res) => {
         owner: getUser._id,
         investedIn: req.body.investedIn,
         currentPrice: req.body.currentPrice,
-        unit: req.body.unit
+        unit: req.body.unit,
+        unitName: req.body.unitName,
       });
       const savedDeposit = await getDeposit.save();
       // now subtracting amount from accountBalance of the user and also adding to user totalDeposited
@@ -67,6 +68,23 @@ exports.getAllInvestments = async (req, res) => {
       err: false,
       msg: "All deposits",
       data: allDeposits
+    })
+  } catch (error) {
+    console.log(error)
+    res.status(400).json({
+      err: true,
+      msg: 'Check your internet connection',
+    });
+  }
+}
+
+exports.getEachDepositInvestment = async(req,res) => {
+  try {
+    const eachDeposits = await depositShema.findOne({_id: req.params.ID})
+    return res.status(200).json({
+      err: false,
+      msg: "Each deposit",
+      data: eachDeposits
     })
   } catch (error) {
     console.log(error)

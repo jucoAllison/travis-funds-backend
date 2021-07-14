@@ -18,6 +18,7 @@ app.use('/modify', require('./api/settings'));
 app.use('/proxy', require('./api/proxy'));
 app.use('/user/accounts/funds', require('./api/fund'));
 app.use('/user/activity/investment', require('./api/deposit'));
+app.use('/user/activity/withdrawal', require('./api/withdrawal'));
 
 mongoose
   .connect(

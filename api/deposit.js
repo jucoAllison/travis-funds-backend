@@ -9,5 +9,10 @@ deposit.post("/new_deposit_for_user", checkAuth, depositController.postNewDeposi
 
 //user getting the investment or deposits, deposited
 deposit.get("/getAllInvestments", checkAuth, depositController.getAllInvestments)
+//use getting each investment full details
+deposit.get("/getEachInvestment/:ID", checkAuth, depositController.getEachDepositInvestment)
+
+// //user creating withdrawal request
+// deposit.get("/getEachInvestment/:ID", checkAuth, depositController.getEachDepositInvestment)
 
 module.exports = deposit
