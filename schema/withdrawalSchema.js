@@ -27,4 +27,4 @@ const CreatingWithdrawal = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model('Deposits', CreatingWithdrawal);
+module.exports = mongoose.model('Withdrawals', CreatingWithdrawal);

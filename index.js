@@ -19,6 +19,7 @@ app.use('/proxy', require('./api/proxy'));
 app.use('/user/accounts/funds', require('./api/fund'));
 app.use('/user/activity/investment', require('./api/deposit'));
 app.use('/user/activity/withdrawal', require('./api/withdrawal'));
+app.use("/admin_side/management/update/user", require("./api/adminSide"))
 
 mongoose
   .connect(
@@ -41,6 +42,7 @@ app.use((req, res, next) => {
 app.use((error, req, res, next) => {
   res.status(error.status || 500);
   res.json({
+    err: true,
     error: {
       message: error.message,
     },

@@ -43,12 +43,17 @@ exports.signIN = async (req, res) => {
       }
     };
     const getEmail = await userSchema.findOne({[type]: check(type)});
+    // console.log()
     if (!getEmail) {
-      return res.status(500).json({err: true, msg: 'authentication failed'});
+      return res
+        .status(500)
+        .json({err: true, msg: 'Authentication failed'});
     }
     const parsePassword = await bcrypt.compare(password, getEmail.password);
     if (!parsePassword) {
-      return res.status(500).json({err: true, msg: 'authentication failed'});
+      return res
+        .status(500)
+        .json({err: true, msg: 'Authentication failed'});
     }
     const token = await jwt.sign(
       {...getEmail._doc, password: ''},
@@ -64,7 +69,7 @@ exports.signIN = async (req, res) => {
         _id: getEmail._id,
         msg: 'authentication successfull, account is not activated',
       });
-    } else if (!getEmail.isAccountActivated) {
+    } else if (getEmail.isAccountActivated === false) {
       // url = "/auth/activate"
       return res.status(200).json({
         err: false,
@@ -92,45 +97,41 @@ exports.signIN = async (req, res) => {
 // : https://www.binance.com/bapi/composite/v1/public/marketing/symbol/list
 exports.updateProfile = async (req, res) => {
   try {
-    
-  
-  
-  const _id = req.user._id;
-  const {first_name, last_name, username, address, country, city} = req.body;
-  // finding if username exists because username should be unique
-  const existUsername = await userSchema.findOne({username});
-  if (existUsername) {
-    return res.status(500).json({err: true, msg: 'username exits already'});
+    const _id = req.user._id;
+    const {first_name, last_name, username, address, country, city} = req.body;
+    // finding if username exists because username should be unique
+    const existUsername = await userSchema.findOne({username});
+    if (existUsername) {
+      return res.status(500).json({err: true, msg: 'username exits already'});
+    }
+
+    const updateUser = await userSchema.findOneAndUpdate(
+      {_id},
+      {first_name, last_name, username, address, city, country},
+      {new: true}
+    );
+    res.status(201).json({
+      msg: 'updated profile successfully',
+      err: false,
+      _id: updateUser._id,
+    });
+    const random = Math.random().toString().split('.')[1];
+    const another = Math.random().toString().split('.')[1];
+    const mixxing = Math.random().toString().split('.')[1];
+    const ID = req.user._id;
+    // const username = username
+    const name = `${first_name}-${last_name}`;
+    // sending email for verifying account email
+    // sending email for verifying account email
+    // sending email for verifying account email
+    // sending email for verifying account email
+
+    // email url for activating account is
+    // "/activate-account/:random/:name/:username/:ID/:another"
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({msg: 'Check your internet connection', err: true});
   }
-
-  const updateUser = await userSchema.findOneAndUpdate(
-    {_id},
-    {first_name, last_name, username, address, city, country},
-    {new: true}
-  );
-  res.status(201).json({
-    msg: 'updated profile successfully',
-    err: false,
-    _id: updateUser._id,
-  });
-  const random = Math.random().toString().split('.')[1];
-  const another = Math.random().toString().split('.')[1];
-  const mixxing = Math.random().toString().split('.')[1];
-  const ID = req.user._id;
-  // const username = username
-  const name = `${first_name}-${last_name}`;
-  // sending email for verifying account email
-  // sending email for verifying account email
-  // sending email for verifying account email
-  // sending email for verifying account email
-
-  // email url for activating account is
-  // "/activate-account/:random/:name/:username/:ID/:another"
-
-} catch (error) {
-    console.log(error)
-    res.status(500).json({msg: "Check your internet connection", err: true})
-}
 };
 
 // activating user Email, this is to be activataved from email sent to the user from his email address,

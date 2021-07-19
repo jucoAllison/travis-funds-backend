@@ -2,7 +2,9 @@ const userSchema = require('./schema/userSchema');
 
 exports.getCurrentDate = () => {
   //  date structure = dd-mm--yy
-  let date = `${new Date().getDate()}-${new Date().getMonth()}-${new Date().getYear()}`;
+  // let date = `${new Date().getDate()}-${new Date().getMonth()}-${new Date().getYear()}`;
+  let date = `${new Date().toLocaleDateString()}`;
+  
   return date;
 };
 

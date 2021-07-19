@@ -1,4 +1,5 @@
 const fundSchema = require('../schema/fundingAccount');
+const depositSchema = require('../schema/depositingSchema');
 const userSchema = require('../schema/userSchema');
 const jwt = require('jsonwebtoken');
 
@@ -82,12 +83,20 @@ exports.fundMyAccount = async (req, res) => {
 
 exports.get_fund_history = async (req, res) => {
   try {
-    const getAll = await fundSchema.find({owner: req.user._id});
+    const getAll = await fundSchema.find({owner: req.params.ID});
+    const getAllDeposit = await depositSchema.find({owner: req.params.ID});
+    const refactorGetAll = await getAll.map((v) => {
+      return {...v._doc, name: 'Fund'};
+    });
+    const refactorAllDeposit = await getAllDeposit.map((v) => {
+      return {...v._doc, name: 'Investment'};
+    });
+    const allHistory = await [...refactorGetAll, ...refactorAllDeposit];
     res.status(200).json({
       err: false,
       // token,
-      data: getAll,
-      msg: 'successfully funded your account, pending for approval',
+      data: allHistory,
+      msg: 'Account history',
     });
   } catch (error) {
     console.log(error);
@@ -153,6 +162,62 @@ exports.approveFund = async (req, res) => {
         });
       }
     }
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({
+      err: true,
+      msg: 'Check your internet connection',
+    });
+  }
+};
+
+exports.sendFundsToAnyUser = async (req, res) => {
+
+  if(req.verify._id == req.body.address){
+    return res.status(200).json({err: true, msg: "Operation not allowed"})
+  }
+
+  // update user amount
+  try {
+    if (req.verify.accountBalance <= +req.body.amount) {
+      return res.status(200).json({
+        err: true,
+        msg: `You don't have effort balance ${req.verify.first_name}`,
+      });
+    }
+    const calcAmount = await req.verify.accountBalance - +req.body.amount;
+    const userAmount = await userSchema.findOneAndUpdate(
+      {_id: req.verify._id},
+      {accountBalance: calcAmount},
+      {new: true}
+    );
+    const token = await jwt.sign(
+      {...userAmount._doc, password: ''},
+      process.env.TOKEN,
+      {expiresIn: '15m'}
+    );
+
+    const getSendingUser = await userSchema.findOne({_id: req.body.address});
+
+    if (!getSendingUser) {
+      return res.status(200).json({
+        err: true,
+        msg: `Incorrect address`,
+      });
+    }
+
+    // adding sent user the amount
+    const sendingCalc = getSendingUser.accountBalance + +req.body.amount;
+    const updatingSendingUser = await userSchema.findOneAndUpdate(
+      {_id: getSendingUser._id},
+      {accountBalance: sendingCalc},
+      {new: true}
+    );
+    return res.status(200).json({
+      err: false,
+      msg: `Successfully made a transfer to ${updatingSendingUser.first_name}`,
+      token
+    })
   } catch (error) {
     console.log(error);
     res.status(400).json({

@@ -21,7 +21,7 @@ exports.changePassword = async (req, res) => {
     {new: true}
   );
   const token = await jwt.sign(
-    {...user._doc, password: ''},
+    {...updatePassword._doc, password: ''},
     process.env.TOKEN,
     {expiresIn: '30m'}
   );
