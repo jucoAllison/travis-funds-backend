@@ -19,7 +19,7 @@ const newUser = new mongoose.Schema({
   lastLogin: String,
   lastLoginHolder: String,
   tfa: {type: Boolean, required: true, default: false},
-  referrals: {type: Array, required: true, default: []},
+  referral: String,
   upline: String,
   activeReferrals: {type: Number, required: true, default: 0},
   referralEarnings: {type: Number, required: true, default: 0},

@@ -18,5 +18,11 @@ adminSide.put("/put/transaction/cancle/:ID", adminSideController.cancleTransacti
 // togging cancle of every fund, deposit and withdrawal
 adminSide.delete("/delete/transaction/:ID", adminSideController.deleteTransaction)
 
+// admin getting list of all funds and user details of users that fund there account
+adminSide.get("/get/account/fundDetails", adminSideController.getAllFundsAndDetails)
+
+// admin getting each transaction details whether fund or deposit or whedrawal
+adminSide.get("/get/account/transaction/:ID/:name", adminSideController.getTransaction)
+
 
 module.exports = adminSide

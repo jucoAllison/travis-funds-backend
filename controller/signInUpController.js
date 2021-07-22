@@ -5,7 +5,7 @@ const userSchema = require('../schema/userSchema');
 
 // creating new user || signUP
 exports.signUP = async (req, res) => {
-  const {email, password} = req.body;
+  const {email, password, referral} = req.body;
   if (password.length < 7) {
     return res.status(500).json({err: true, msg: 'password is weak'});
   }
@@ -18,9 +18,25 @@ exports.signUP = async (req, res) => {
   const newUser = new userSchema({
     password: hashPassword,
     email,
+    referral,
   });
 
+
   const saveUser = await newUser.save();
+  // now getting the referral and crediting her 10usd
+  // if(referral.length )
+  const foundrRef = await userSchema.findOne({username: referral})
+  if(!foundrRef){
+    res.status(201).json({
+      err: false,
+      msg: 'sign-up successful, please continue',
+      // token,
+      _id: saveUser._id,
+      isVerify: saveUser.verifyEmail,
+    });
+  } 
+  const calcRefBal = await foundrRef.accountBalance + 10
+   const updateRef = await userSchema.findOneAndUpdate({_id: foundrRef._id}, {accountBalance: calcRefBal}, {new: true})
   res.status(201).json({
     err: false,
     msg: 'sign-up successful, please continue',
@@ -60,6 +76,7 @@ exports.signIN = async (req, res) => {
       process.env.TOKEN,
       {expiresIn: '15m'}
     );
+
     // let url
     if (!getEmail.username) {
       // url = "/auth/verify"

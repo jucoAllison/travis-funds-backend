@@ -7,7 +7,7 @@ const CreatingFunding = new mongoose.Schema({
     canceled: {type: Boolean, required: true, default: false},
     amount: {type: String, required: true},
     owner: {type: mongoose.Schema.Types.ObjectId, required: true},
-    date: {type: String, required: true,  default: new Date().getMonth() + "/" +  new Date().getDate()+"/"+ new Date().getYear()}
+    date: {type: String, required: true,  default: helper.getCurrentDate()}
 });
 
 module.exports = mongoose.model('Funding', CreatingFunding);

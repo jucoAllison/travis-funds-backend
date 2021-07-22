@@ -1,4 +1,5 @@
 const depositShema = require('../schema/depositingSchema');
+const withdrawalSchema = require('../schema/withdrawalSchema');
 const fundSchema = require('../schema/fundingAccount');
 const userSchema = require('../schema/userSchema');
 const jwt = require('jsonwebtoken');
@@ -156,6 +157,31 @@ exports.processTransaction = async (req, res) => {
         err: false,
         msg: 'Update successful',
       });
+    } else if (req.body.name === 'Withdrawal') {
+      const findFund = await withdrawalSchema.findOne({_id: req.params.ID});
+      if (!findFund) {
+        return res.status(200).json({
+          err: true,
+          msg: `Can't find any ${req.body.name}`,
+        });
+      }
+      const calcBalance = await findFund.processed;
+      const calcPending = await findFund.pending;
+      // console.log('calcBalance', calcBalance);
+      // console.log('calcPending', calcPending);
+      const updateFund = await withdrawalSchema.findOneAndUpdate(
+        {_id: findFund._id},
+        {
+          pending: calcBalance ? true : false,
+          canceled: false,
+          processed: !calcBalance,
+        },
+        {new: true}
+      );
+      return res.status(201).json({
+        err: false,
+        msg: 'Update successful',
+      });
     } else {
       return res.status(200).json({
         err: true,
@@ -221,6 +247,31 @@ exports.cancleTransaction = async (req, res) => {
         err: false,
         msg: 'Update successful',
       });
+    } else if (req.body.name === 'Withdrawal') {
+      const findFund = await withdrawalSchema.findOne({_id: req.params.ID});
+      if (!findFund) {
+        return res.status(200).json({
+          err: true,
+          msg: `Can't find any ${req.body.name}`,
+        });
+      }
+      const calcBalance = await findFund.canceled;
+      const calcPending = await findFund.pending;
+      // console.log('calcBalance', calcBalance);
+      // console.log('calcPending', calcPending);
+      const updateFund = await withdrawalSchema.findOneAndUpdate(
+        {_id: findFund._id},
+        {
+          pending: calcBalance ? true : false,
+          canceled: !calcBalance,
+          processed: false,
+        },
+        {new: true}
+      );
+      return res.status(201).json({
+        err: false,
+        msg: 'Update successful',
+      });
     } else {
       return res.status(200).json({
         err: true,
@@ -254,7 +305,15 @@ exports.deleteTransaction = async (req, res) => {
         err: true,
         msg: 'Delete Successful',
       });
-    } else {
+    } else if (req.body.name === 'Withdrawal') {
+      const deleteFund = await withdrawalSchema.findOneAndDelete({
+        _id: req.params.ID,
+      });
+      return res.status(200).json({
+        err: true,
+        msg: 'Delete Successful',
+      });
+    }else {
       return res.status(200).json({
         err: true,
         msg: 'No specification type',
@@ -268,3 +327,88 @@ exports.deleteTransaction = async (req, res) => {
     });
   }
 };
+
+
+
+exports.getAllFundsAndDetails = async(req,res) => {
+  try {
+    const getAllFunds = await fundSchema.find()
+    const allDeposit = await depositShema.find()
+    const allWithdrawal = await withdrawalSchema.find()
+    const refactorGetAll = await getAllFunds.map((v) => {
+      return {...v._doc, name: 'Fund'};
+    });
+    const refactorAllDeposit = await allDeposit.map((v) => {
+      return {...v._doc, name: 'Investment'};
+    });
+    const refactorAllWithdrawal = await allWithdrawal.map((v) => {
+      return {...v._doc, name: 'Withdrawal'};
+    });
+    const allHistory = await [...refactorGetAll, ...refactorAllDeposit, ...refactorAllWithdrawal];
+    return res.status(200).json({msg: "success", data: allHistory, err: false})
+  } catch (error) {
+     console.log(error);
+    res.status(200).json({
+      err: true,
+      msg: 'Check your internet connection',
+    });
+  }
+}
+
+exports.getTransaction = async (req,res) => {
+  try {
+    if (req.params.name === 'Fund') {
+      const findFund = await fundSchema.findOne({_id: req.params.ID});
+      if (!findFund) {
+        return res.status(200).json({
+          err: true,
+          msg: `Can't find any ${req.params.name}`,
+        });
+      }
+      const findUser = await userSchema.findOne({_id: findFund.owner})
+      
+      return res.status(201).json({
+        err: false,
+        data: {...findFund._doc, ...findUser._doc, password: ""},
+        msg: 'Update successful',
+      });
+    } else if (req.params.name === 'Investment') {
+      const findFund = await depositShema.findOne({_id: req.params.ID});
+      if (!findFund) {
+        return res.status(200).json({
+          err: true,
+          msg: `Can't find any ${req.params.name}`,
+        });
+      }
+      const findUser = await userSchema.findOne({_id: findFund.owner})
+      
+      return res.status(201).json({
+        err: false,
+        data: {...findFund._doc, ...findUser._doc, password: ""},
+        msg: 'Update successful',
+      });
+    } else if (req.params.name === 'Withdrawal') {
+      const findFund = await withdrawalSchema.findOne({_id: req.params.ID});
+      if (!findFund) {
+        return res.status(200).json({
+          err: true,
+          msg: `Can't find any ${req.params.name}`,
+        });
+      }
+      const findUser = await userSchema.findOne({_id: findFund.owner})
+      
+      return res.status(201).json({
+        err: false,
+        data: {...findFund._doc, ...findUser._doc, password: ""},
+        msg: 'Update successful',
+      });
+    } else {
+      return res.status(200).json({
+        err: true,
+        msg: 'No specification type',
+      });
+    }
+  } catch (error) {
+    
+  }
+}

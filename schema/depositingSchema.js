@@ -19,11 +19,7 @@ const CreatingDeposit = new mongoose.Schema({
     type: String,
     required: true,
     default:
-      new Date().getMonth() +
-      '/' +
-      new Date().getDate() +
-      '/' +
-      new Date().getYear(),
+      helper.getCurrentDate()
   },
 });
 

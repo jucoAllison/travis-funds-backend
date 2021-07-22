@@ -8,4 +8,8 @@ const checkAuth = require("../checkAuth")
 //user creating withdrawal request
 withdrawal.post("/newWithdrawal/:ID", checkAuth, withdrawalController.post_new_withdrawal)
 
+
+//getting all withdrawal for each deposit
+withdrawal.get("/getWithdrawal/:ID", checkAuth, withdrawalController.getEach)
+
 module.exports = withdrawal

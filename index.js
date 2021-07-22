@@ -19,12 +19,13 @@ app.use('/proxy', require('./api/proxy'));
 app.use('/user/accounts/funds', require('./api/fund'));
 app.use('/user/activity/investment', require('./api/deposit'));
 app.use('/user/activity/withdrawal', require('./api/withdrawal'));
+// app.use('/user/activity/withdrawal', require('./api/withdrawal'));
 app.use("/admin_side/management/update/user", require("./api/adminSide"))
 
 mongoose
   .connect(
-    // "mongodb+srv://new_user01:new_user01@cluster0.0lloz.mongodb.net/travisFunds?retryWrites=true&w=majority",
-    'mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass&ssl=false',
+    "mongodb+srv://new_user01:new_user01@cluster0.0lloz.mongodb.net/FCXTRADE?retryWrites=true&w=majority",
+    // 'mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass&ssl=false',
     {useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false}
   )
   .then(() => {

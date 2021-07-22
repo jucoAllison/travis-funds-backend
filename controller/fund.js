@@ -1,5 +1,6 @@
 const fundSchema = require('../schema/fundingAccount');
 const depositSchema = require('../schema/depositingSchema');
+const withdrawalSchema = require('../schema/withdrawalSchema');
 const userSchema = require('../schema/userSchema');
 const jwt = require('jsonwebtoken');
 
@@ -9,69 +10,26 @@ exports.fundMyAccount = async (req, res) => {
     // if (existEmail) {
     //   return res.status(500).json({err: true, msg: 'email exits already'});
     // }
-    // const findUser = userSchema.findOne({_id :})
+    const findUser = userSchema.findOne({_id: req.verify._id});
 
     // if(req.user.)
 
-    if (!req.user.investingAmount) {
-      if (+req.body.amount > '99') {
-        const calc = +req.body.amount + +req.body.amount * 0.2;
-        const updateUser = await userSchema.findOneAndUpdate(
-          {_id: req.user._id},
-          {investingAmount: calc},
-          {new: true}
-        );
-
-        const newFund = new fundSchema({
-          amount: req.body.amount,
-          owner: updateUser._id,
-        });
-        const saveFunds = await newFund.save();
-        const token = await jwt.sign(
-          {...updateUser._doc, password: ''},
-          process.env.TOKEN,
-          {expiresIn: '15m'}
-        );
-        res.status(200).json({
-          err: false,
-          msg: 'successfully funded your account, pending for approval',
-          token,
-        });
-      } else {
-        return res
-          .status(401)
-          .json({err: true, msg: "Can't fund with this amount"});
-      }
-    } else {
-      if (+req.body.amount > Math.floor(+req.user.investingAmount) - 1) {
-        const calc = +req.body.amount + +req.body.amount * 0.2;
-        const updateUser = await userSchema.findOneAndUpdate(
-          {_id: req.user._id},
-          {investingAmount: calc},
-          {new: true}
-        );
-
-        const newFund = await new fundSchema({
-          amount: req.body.amount,
-          owner: updateUser._id,
-        });
-        const token = await jwt.sign(
-          {...updateUser._doc, password: ''},
-          process.env.TOKEN,
-          {expiresIn: '15m'}
-        );
-        const saveFunds = await newFund.save();
-        res.status(200).json({
-          err: false,
-          token,
-          msg: 'successfully funded your account, pending for approval',
-        });
-      } else {
-        return res
-          .status(401)
-          .json({err: true, msg: "Can't fund with this amount"});
-      }
-    }
+    const newFund = new fundSchema({
+      amount: req.body.amount,
+      owner: updateUser._id,
+    });
+    const saveFunds = await newFund.save();
+    const token = await jwt.sign(
+      {...findUser._doc, password: ''},
+      process.env.TOKEN,
+      {expiresIn: '15m'}
+    );
+    
+    res.status(200).json({
+      err: false,
+      msg: 'successfully funded your account, pending for approval',
+      token,
+    });
   } catch (error) {
     console.log(error);
     res.status(400).json({
@@ -85,13 +43,17 @@ exports.get_fund_history = async (req, res) => {
   try {
     const getAll = await fundSchema.find({owner: req.params.ID});
     const getAllDeposit = await depositSchema.find({owner: req.params.ID});
+    const allWithdrawal = await withdrawalSchema.find({owner: req.params.ID})
     const refactorGetAll = await getAll.map((v) => {
       return {...v._doc, name: 'Fund'};
     });
     const refactorAllDeposit = await getAllDeposit.map((v) => {
       return {...v._doc, name: 'Investment'};
     });
-    const allHistory = await [...refactorGetAll, ...refactorAllDeposit];
+    const refactorAllWithdrawal = await allWithdrawal.map((v) => {
+      return {...v._doc, name: 'Withdrawal'};
+    });
+    const allHistory = await [...refactorGetAll, ...refactorAllDeposit, ...refactorAllWithdrawal];
     res.status(200).json({
       err: false,
       // token,
@@ -172,9 +134,8 @@ exports.approveFund = async (req, res) => {
 };
 
 exports.sendFundsToAnyUser = async (req, res) => {
-
-  if(req.verify._id == req.body.address){
-    return res.status(200).json({err: true, msg: "Operation not allowed"})
+  if (req.verify._id == req.body.address) {
+    return res.status(200).json({err: true, msg: 'Operation not allowed'});
   }
 
   // update user amount
@@ -185,7 +146,7 @@ exports.sendFundsToAnyUser = async (req, res) => {
         msg: `You don't have effort balance ${req.verify.first_name}`,
       });
     }
-    const calcAmount = await req.verify.accountBalance - +req.body.amount;
+    const calcAmount = (await req.verify.accountBalance) - +req.body.amount;
     const userAmount = await userSchema.findOneAndUpdate(
       {_id: req.verify._id},
       {accountBalance: calcAmount},
@@ -216,8 +177,8 @@ exports.sendFundsToAnyUser = async (req, res) => {
     return res.status(200).json({
       err: false,
       msg: `Successfully made a transfer to ${updatingSendingUser.first_name}`,
-      token
-    })
+      token,
+    });
   } catch (error) {
     console.log(error);
     res.status(400).json({
